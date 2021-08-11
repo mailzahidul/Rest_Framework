@@ -4,6 +4,9 @@ from .models import Student
 from .serializers import StudentSerializers, StudentCreateSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 import io
 # Create your views here.
@@ -40,3 +43,26 @@ def student_create(request):
         msg = {'msg':'failed'}
         json_data = JSONRenderer().render(msg)
         return HttpResponse(json_data, content_type = 'application/json')
+
+
+@api_view(['GET','POST'])
+def function_base_view(request):
+    if request.method == 'GET':
+        students = Student.objects.all()
+        serializer = StudentSerializers(students, many=True)
+        context = {
+            'status':'success',
+            'data':serializer.data
+        }
+        return Response(context, status = status.HTTP_200_OK)
+    
+    if request.method == 'POST':
+        serializer = StudentSerializers(data=request.data)          # request.data works like request.POST
+        if serializer.is_valid():
+            name = serializer.validated_data['name']
+            roll = serializer.validated_data['roll']
+            city = serializer.validated_data['city']
+            obj = Student.objects.create(name=name, roll=roll, city=city)
+            return Response({'staus':'Ok'}, status = status.HTTP_200_OK)
+        else:
+            return Response(py_data.errors, status = status.HTTP_400_BAD_REQUEST)
