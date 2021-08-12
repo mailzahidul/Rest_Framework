@@ -9,4 +9,8 @@ urlpatterns = [
 
     # Using View function
     path('function_base_view', views.function_base_view, name='function_base_view'),
+    path('function_base_view/<int:pk>', views.function_base_view, name='function_base_view'),
+    
+    # Using View function
+    path('class_base_view', views.ClassBaseView.as_view(), name='class_base_view'),
 ]

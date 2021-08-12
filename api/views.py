@@ -6,6 +6,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 import io
@@ -45,16 +46,18 @@ def student_create(request):
         return HttpResponse(json_data, content_type = 'application/json')
 
 
-@api_view(['GET','POST'])
-def function_base_view(request):
+@api_view(['GET','POST', 'PUT'])
+def function_base_view(request, pk=None):
     if request.method == 'GET':
+        id = pk
+        if id is not None:
+            student = Student.objects.get(id=pk)
+            serializer = StudentSerializers(student)
+            return Response(serializer.data, status = status.HTTP_200_OK)
+
         students = Student.objects.all()
         serializer = StudentSerializers(students, many=True)
-        context = {
-            'status':'success',
-            'data':serializer.data
-        }
-        return Response(context, status = status.HTTP_200_OK)
+        return Response(serializer.data, status = status.HTTP_200_OK)
     
     if request.method == 'POST':
         serializer = StudentSerializers(data=request.data)          # request.data works like request.POST
@@ -66,3 +69,31 @@ def function_base_view(request):
             return Response({'staus':'Ok'}, status = status.HTTP_200_OK)
         else:
             return Response(py_data.errors, status = status.HTTP_400_BAD_REQUEST)
+    
+    if request.method == 'PUT':                                     # PUT Work for Complete Upsata an object data
+        id=pk
+        student = Student.objects.get(id=pk)
+        serializer = StudentSerializers(student, data=request.data)
+        if serializer.is_valid():
+            name = serializer.validated_data['name']
+            roll = serializer.validated_data['roll']
+            city = serializer.validated_data['city']
+            student.name = name
+            student.roll = roll
+            student.city = city
+            student.save()
+            return Response({'msg':"Complete Update successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class ClassBaseView(APIView):
+    def get(self, request):
+        stu=Student.objects.all()
+        serializer = StudentSerializers(stu, many=True)
+        context = {
+            'msg':'success',
+            'data':serializer.data
+        }
+        return Response(context, status = status.HTTP_200_OK)
