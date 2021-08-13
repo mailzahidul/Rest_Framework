@@ -13,4 +13,5 @@ urlpatterns = [
     
     # Using View function
     path('class_base_view', views.ClassBaseView.as_view(), name='class_base_view'),
+    path('class_base_view/<int:pk>', views.ClassBaseView.as_view(), name='class_base_view'),
 ]

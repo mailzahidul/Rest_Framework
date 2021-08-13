@@ -96,11 +96,13 @@ def function_base_view(request, pk=None):
 
 
 class ClassBaseView(APIView):
-    def get(self, request):
-        stu=Student.objects.all()
-        serializer = StudentSerializers(stu, many=True)
-        context = {
-            'msg':'success',
-            'data':serializer.data
-        }
-        return Response(context, status = status.HTTP_200_OK)
+    def get(self, request, pk=None):
+        id = pk
+        if id is not None:
+            stu=Student.objects.get(id=id)
+            serializer = StudentSerializers(stu)
+            return Response({'msg':serializer.data}, status = status.HTTP_200_OK)
+        else:
+            stu=Student.objects.all()
+            serializer = StudentSerializers(stu, many=True)
+            return Response({'msg':serializer.data}, status = status.HTTP_200_OK)
