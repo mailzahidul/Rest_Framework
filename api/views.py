@@ -46,7 +46,7 @@ def student_create(request):
         return HttpResponse(json_data, content_type = 'application/json')
 
 
-@api_view(['GET','POST', 'PUT'])
+@api_view(['GET','POST', 'PUT', 'PATCH', 'DELETE'])
 def function_base_view(request, pk=None):
     if request.method == 'GET':
         id = pk
@@ -84,6 +84,13 @@ def function_base_view(request, pk=None):
             student.save()
             return Response({'msg':"Complete Update successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    if request.method == 'DELETE':
+        id=pk
+        student = Student.objects.get(pk=id)
+        student.delete()
+        return Response({'msg':'Student Deleted !!!'}, status=status.HTTP_200_OK)
+
 
 
 
