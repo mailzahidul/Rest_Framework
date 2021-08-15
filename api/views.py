@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .models import Student
-from .serializers import StudentSerializers, StudentCreateSerializer
+from .serializers import StudentSerializers, StudentCreateSerializer, StudentModelSerializer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
@@ -92,17 +92,52 @@ def function_base_view(request, pk=None):
         return Response({'msg':'Student Deleted !!!'}, status=status.HTTP_200_OK)
 
 
-
-
-
 class ClassBaseView(APIView):
-    def get(self, request, pk=None):
+    def get(self, request, pk=None, format = None):
         id = pk
         if id is not None:
             stu=Student.objects.get(id=id)
-            serializer = StudentSerializers(stu)
-            return Response({'msg':serializer.data}, status = status.HTTP_200_OK)
+            serializer = StudentModelSerializer(stu)
+            return Response(serializer.data, status = status.HTTP_200_OK)
         else:
             stu=Student.objects.all()
-            serializer = StudentSerializers(stu, many=True)
-            return Response({'msg':serializer.data}, status = status.HTTP_200_OK)
+            serializer = StudentModelSerializer(stu, many=True)
+            return Response(serializer.data, status = status.HTTP_200_OK)
+    
+    
+    def post(self, request, format = None):
+        serializer = StudentModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'msg':'Student Create Successfully...'}, status = status.HTTP_200_OK)
+        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self, request, pk=None, format = None):             # put work for Partial Update 
+        id=pk
+        if id is not None:
+            stu = Student.objects.get(id=id)
+            serializer = StudentModelSerializer(stu, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg':'Put work successfully...'}, status= status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+    
+
+    def patch(self, request, pk, format = None):                    # patch work for Partial Update 
+        id = pk
+        if id is not None:
+            stu = Student.objects.get(id=id)
+            serializer= StudentModelSerializer(stu, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'mgs':'Path work successfully...'}, status= status.HTTP_200_OK)
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+    
+
+    def delete(self, request, pk, format = None):
+        stu = Student.objects.get(id=pk)
+        stu.delete()
+        return Response({'msg':'Delete Successfully..'}, status = status.HTTP_200_OK)
+
