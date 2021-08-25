@@ -6,6 +6,13 @@ class StudentSerializers(serializers.Serializer):
     roll = serializers.IntegerField()
     city = serializers.CharField()
 
+    def validate_roll(self, value):
+        if value >= 200:
+            raise serializers.ValidationError('Set Full')
+        return value
+
+
+
 
 class StudentCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -20,4 +27,9 @@ class StudentModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['id','name', 'roll', 'city']
+    
+    def validate_roll(self, value):
+        if value >= 200:
+            raise serializers.ValidationError('Set Full')
+        return value
     
