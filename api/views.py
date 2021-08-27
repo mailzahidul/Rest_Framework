@@ -68,7 +68,7 @@ def function_base_view(request, pk=None):
             obj = Student.objects.create(name=name, roll=roll, city=city)
             return Response({'staus':'Ok'}, status = status.HTTP_200_OK)
         else:
-            return Response(py_data.errors, status = status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
     
     if request.method == 'PUT':                                     # PUT Work for Complete Upsata an object data
         id=pk
